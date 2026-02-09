@@ -84,9 +84,10 @@ Para la consulta del historial, **NO** se traen todos los registros a memoria ni
 ## 👨‍💻 Autor
 
 **Martín Rubio** - *Mainframe Developer*
-* [LinkedIn](TU_LINKEDIN)
+* [LinkedIn](https://www.linkedin.com/in/martin-oscar-rubio-0a0628355/)
 
 ---
 *Este proyecto fue desarrollado como parte de un portafolio técnico para demostrar competencias avanzadas en el desarrollo de software para el sector bancario/financiero.*
+
 
 
