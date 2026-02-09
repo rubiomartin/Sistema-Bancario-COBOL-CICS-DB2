@@ -10,7 +10,7 @@
 
 ## Video explicativo (clickea la imagen)
 
-[![SAT](assets%2FImagenVideo.png)](LINK DE YOUTUBE)
+[![SAT](assets%2FImagenVideo.png)](https://youtu.be/YnhqSjVJyWA)
 
 ---
 
@@ -88,6 +88,7 @@ Para la consulta del historial, **NO** se traen todos los registros a memoria ni
 
 ---
 *Este proyecto fue desarrollado como parte de un portafolio técnico para demostrar competencias avanzadas en el desarrollo de software para el sector bancario/financiero.*
+
 
 
 
