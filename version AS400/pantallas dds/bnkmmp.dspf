@@ -1,0 +1,27 @@
+     A*===============================================================
+     A* PANTALLA DE MENU PRINCIPAL
+     A*===============================================================
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      INDARA
+     A                                      CA03(03 'Salir')
+     A                                      CA12(12 'Volver')
+     A          R BNKMAPM
+     A*===============================================================
+     A                                  2 20'=== MENU PRINCIPAL DEL BANCO ==='
+     A                                      DSPATR(HI) COLOR(GRN)
+     A                                  4 10'USUARIO CONECTADO:'
+     A                                      COLOR(YLW)
+     A            NOMBREUS      10A  O  4 31DSPATR(HI)
+     A                                  5  2'----------------------------------'
+     A                                      COLOR(BLU)
+     A                                  5 38'------------------------------'
+     A                                      COLOR(BLU)
+     A                                  7 10'1 - CONSULTA, RETIRO Y DEPOSITO'
+     A                                  8 10'2 - TRANSFERENCIA ENTRE CUENTAS'
+     A                                  9 10'3 - VER HISTORIAL'
+     A                                 20 10'MENSAJE:'
+     A                                      COLOR(YLW)
+     A            MSGO          60A  O 20 19COLOR(RED)
+     A                                 22 10'SELECCIONE UNA OPCION:'
+     A                                      COLOR(YLW)
+     A            OPCIONI        1A  I 22 33

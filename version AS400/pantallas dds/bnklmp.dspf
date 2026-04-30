@@ -1,0 +1,22 @@
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      INDARA
+     A                                      CA03(03 'Salir')
+     A          R PIE01
+     A                                 23  2'----------------------------------'
+     A                                 23 40'----------------------------------'
+     A                                      DSPATR(HI)
+     A                                      DSPATR(UL)
+     A                                 24 19'F3: Salir'
+     A                                      DSPATR(HI)
+     A          R BNKMAPL
+     A                                  1 30'SISTEMA DE LOGIN'
+     A                                      DSPATR(HI)
+     A                                  5 37'BANCO'
+     A                                      COLOR(BLU) DSPATR(HI)
+     A                                 12 25'USUARIO:'
+     A            USERI          8A  B 12 36DSPATR(UL)
+     A  10                                  ERRMSG('Usuario no registrado')
+     A  30                                  ERRMSG('Error interno en BD')
+     A                                 13 25'PASSWORD:'
+     A            PASSI          8A  B 13 36DSPATR(UL)
+     A  20                                  ERRMSG('Contrasena incorrecta')

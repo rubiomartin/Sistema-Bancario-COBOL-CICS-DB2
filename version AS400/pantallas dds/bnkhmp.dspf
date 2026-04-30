@@ -1,0 +1,48 @@
+     A*===============================================================
+     A* PANTALLA DE HISTORIAL (SUBFILE)
+     A*===============================================================
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      INDARA
+     A                                      CA03(03 'Volver al Menu')
+     A*---------------------------------------------------------------
+     A* FORMATO DE DETALLE DEL SUBFILE (SFL)
+     A*---------------------------------------------------------------
+     A          R BNKMAPHS                  SFL
+     A            FECHAD        10A  O  8  2
+     A            TIPOD          1A  O  8 20
+     A            MONTOD        11Y 2O  8 30EDTCDE(J)
+     A            USRRELD        8A  O  8 50
+     A*---------------------------------------------------------------
+     A* FORMATO DE CONTROL DEL SUBFILE (SFLCTL) - CABECERA
+     A*---------------------------------------------------------------
+     A          R BNKMAPHC                  SFLCTL(BNKMAPHS)
+     A                                      SFLSIZ(0050)
+     A                                      SFLPAG(0010)
+     A                                      OVERLAY
+     A  40                                  SFLDSP
+     A  41                                  SFLDSPCTL
+     A  42                                  SFLCLR
+     A  43                                  SFLEND(*MORE)
+     A                                  2 24'=== HISTORIAL DE OPERACIONES ==='
+     A                                      DSPATR(HI) COLOR(GRN)
+     A                                  4  2'USUARIO:'
+     A                                      COLOR(YLW)
+     A            NOMBREUS      10A  O  4 11DSPATR(HI)
+     A                                  4 45'SALDO ACTUAL :$'
+     A                                      COLOR(YLW)
+     A            SALDO         11Y 2O  4 61EDTCDE(J)
+     A                                  6  2'FECHA'
+     A                                      COLOR(TRQ) DSPATR(UL)
+     A                                  6 20'TIPO'
+     A                                      COLOR(TRQ) DSPATR(UL)
+     A                                  6 30'MONTO'
+     A                                      COLOR(TRQ) DSPATR(UL)
+     A                                  6 50'USR. REL.'
+     A                                      COLOR(TRQ) DSPATR(UL)
+     A*---------------------------------------------------------------
+     A* FORMATO DE PIE DE PANTALLA (FOOTER)
+     A*---------------------------------------------------------------
+     A          R BNKMAPHF                  OVERLAY
+     A                                 22  5'MENSAJE:'
+     A                                      COLOR(YLW)
+     A            MSGO          60A  O 22 14COLOR(RED)

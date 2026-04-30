@@ -1,0 +1,43 @@
+     A*===============================================================
+     A* PANTALLA DE DEPOSITOS Y RETIROS
+     A*===============================================================
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      INDARA
+     A                                      CA03(03 'Volver al Menu')
+     A          R BNKMAPX
+     A*===============================================================
+     A                                  2 22'=== GESTION DE TRANSACCIONES ==='
+     A                                      DSPATR(HI) COLOR(GRN)
+     A                                  4  5'USUARIO CONECTADO:'
+     A                                      COLOR(YLW)
+     A            NOMBREUS       8A  O  4 25DSPATR(HI)
+     A                                  4 45'SALDO ACTUAL :$'
+     A                                      COLOR(YLW)
+     A            SALDO         10Y 2O  4 61EDTCDE(J)
+     A                                  5  2'----------------------------------'
+     A                                      COLOR(BLU)
+     A                                  5 38'------------------------------'
+     A                                      COLOR(BLU)
+     A                                  8 15'D - DEPOSITAR DINERO (INGRESAR)'
+     A                                  9 15'R - RETIRAR DINERO (EGRESAR)'
+     A                                 13 15'TIPO OPERACION (D/R):'
+     A                                      COLOR(YLW)
+     A            TIPOOPER       1A  B 13 40DSPATR(UL)
+     A                                 15 15'MONTO A OPERAR      :$'
+     A                                      COLOR(YLW)
+     A            MONTOI        10Y 2B 15 40EDTCDE(J) DSPATR(UL) CHECK(RZ)
+     A                                 22 10'MENSAJE:'
+     A                                      COLOR(YLW)
+     A            MSGO          60A  O 22 19COLOR(RED)
+     A*===============================================================
+     A* VENTANA EMERGENTE DE CONFIRMACION
+     A*===============================================================
+     A          R WCONFIRM
+     A                                      WINDOW(10 20 6 42)
+     A                                      WDWBORDER((*COLOR BLU))
+     A                                      OVERLAY
+     A            MSGCONF       40A  O  2  2COLOR(WHT) DSPATR(HI)
+     A                                  4 10'Ingrese (S/N):'
+     A            CONFIRMA       1A  B  4 25
+     A                                      VALUES('S' 'N' 's' 'n')
+     A                                      DSPATR(PC)

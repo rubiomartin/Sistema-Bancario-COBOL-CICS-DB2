@@ -1,0 +1,41 @@
+     A*===============================================================
+     A* PANTALLA DE TRANSFERENCIA DE FONDOS
+     A*===============================================================
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      INDARA
+     A                                      CA03(03 'Volver al Menu')
+     A          R BNKMAPT
+     A*===============================================================
+     A                                  2 22'=== TRANSFERENCIA DE FONDOS ==='
+     A                                      DSPATR(HI) COLOR(GRN)
+     A                                  4  5'USUARIO CONECTADO:'
+     A                                      COLOR(YLW)
+     A            NOMBREUS      10A  O  4 25DSPATR(HI)
+     A                                  4 45'SALDO ACTUAL :$'
+     A                                      COLOR(YLW)
+     A            SALDO         11Y 2O  4 61EDTCDE(J)
+     A                                  5  2'------------------------------'
+     A                                      COLOR(BLU)
+     A                                  5 36'------------------------------'
+     A                                      COLOR(BLU)
+     A                                  8 15'USUARIO DESTINO :'
+     A                                      COLOR(YLW)
+     A            USRDEST        8A  I  8 36DSPATR(UL)
+     A                                 10 15'MONTO A TRANSFERIR  :$'
+     A                                      COLOR(YLW)
+     A            MONTOI        11Y 2B 10 40EDTCDE(J) DSPATR(UL) CHECK(RZ)
+     A                                 22 10'MENSAJE:'
+     A                                      COLOR(YLW)
+     A            MSGO          60A  O 22 19COLOR(RED)
+     A*===============================================================
+     A* VENTANA EMERGENTE DE CONFIRMACION DE TRANSFERENCIA
+     A*===============================================================
+     A          R WCONFTR
+     A                                      WINDOW(10 10 7 60)
+     A                                      WDWBORDER((*COLOR BLU))
+     A                                      OVERLAY
+     A            MSGCONF       55A  O  2  2COLOR(WHT) DSPATR(HI)
+     A                                  4 20'Ingrese (S/N):'
+     A            CONFIRMA       1A  B  4 35
+     A                                      VALUES('S' 'N' 's' 'n')
+     A                                      DSPATR(PC)
