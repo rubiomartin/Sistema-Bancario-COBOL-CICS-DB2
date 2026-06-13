@@ -48,6 +48,31 @@
            EXEC SQL INCLUDE SQLCA END-EXEC.
            EXEC SQL INCLUDE DCLCLIEN END-EXEC.
            EXEC SQL INCLUDE DCLMOVIM END-EXEC.
+
+      *----------------------------------------------------------------*
+      * ESTRUCTURAS DE CONTENEDORES (CANALES)                          *
+      *----------------------------------------------------------------*
+       01  WS-DATOS-CONSULTA.
+           05 WS-CONS-USER          PIC X(08) VALUE SPACES.
+           05 WS-CONS-SALDO         PIC 9(10)V99.
+           05 WS-CONS-MENSAJE       PIC X(60).
+
+       01  WS-DATOS-OPERACION.
+           05 WS-USER-DEST          PIC X(08) VALUE SPACES.
+           05 WS-CONS-DEST          PIC X.       
+           05 WS-OPER-MONTO         PIC 9(10)V99.
+           05 WS-OPER-SALDO-NUEVO   PIC 9(10)V99.
+           05 WS-OPER-MSGO          PIC X(60).
+
+           
+           05 WS-BANDERAS-CONTROL.
+              10 SW-RESULTADO       PIC X(01).
+                 88 OPERACION-EXITOSA         VALUE 'S'.
+                 88 OPERACION-FALLIDA         VALUE 'N'.
+              10 SW-ERRORES         PIC X(01).
+                 88 HAY-ERROR-VALIDACION      VALUE 'S'.
+                 88 NO-HAY-ERRORES            VALUE 'N'.
+
        01  WS-MONTO-EDITADO      PIC Z.ZZZ.ZZZ.ZZ9,99.
        01  WA-RESPUESTA-CICS        PIC S9(8) COMP.
 
@@ -64,14 +89,6 @@
            03 SW-ENVIO-MAPA         PIC X     VALUE '0'.
               88 ENVIO-ERASE                  VALUE '1'.
               88 ENVIO-DATAONLY               VALUE '2'.
-
-           03 SW-ERRORES            PIC X     VALUE 'N'.
-              88 HAY-ERROR-VALIDACION         VALUE 'S'.
-              88 NO-HAY-ERRORES               VALUE 'N'.
-
-           03 SW-RESULTADO          PIC X     VALUE 'N'.
-              88 OPERACION-EXITOSA            VALUE 'S'.
-              88 OPERACION-FALLIDA            VALUE 'N'.
 
            03 SW-SALDO-LEIDO        PIC X     VALUE 'N'.
 
@@ -121,19 +138,6 @@
       *================================================================*
        1000-PREPARAR-DATOS.
            MOVE LOW-VALUES TO BNKMAPTO.
-
-      * Leemos nuestro saldo para mostrar en pantalla
-           PERFORM 7000-LEER-SALDO-ORIGEN.
-
-           IF SQLCODE = 0
-               MOVE HV-SALDO TO SALDOO
-               MOVE HV-SALDO TO WS-SALDO-ACTUAL
-               MOVE 'S'      TO SW-SALDO-LEIDO
-           ELSE
-               MOVE 0 TO WS-SALDO-ACTUAL
-               MOVE ' ADVERTENCIA: ERROR LEYENDO SALDO' TO MSGO
-               MOVE ATTR-RED TO MSGC
-           END-IF.
 
            SET ENVIO-ERASE TO TRUE.
            PERFORM 4000-ENVIO-MAPA.
@@ -193,21 +197,22 @@
                MOVE WS-VAL-SALIDA-V TO WS-MONTO-DECIMAL
            END-IF.
 
-           PERFORM 7300-VALIDAR-DESTINO-DB2.
+           MOVE 'S' TO WS-CONS-DEST
+           MOVE ZEROS TO WS-OPER-MONTO
+           PERFORM 1234-REALIZAR-OPERACION
 
            EVALUATE TRUE
                WHEN USRDESTI = SPACES OR LOW-VALUES
                    MOVE ' ERROR: INGRESE USUARIO DESTINO' TO MSGO
                    SET HAY-ERROR-VALIDACION TO TRUE
 
-               WHEN SQLCODE NOT = 0
-                   MOVE ' ERROR: USUARIO DESTINO NO EXISTE' TO MSGO
-                   SET HAY-ERROR-VALIDACION TO TRUE
-
                WHEN USRDESTI = CG-M-USER
                    MOVE ' ERROR: NO PUEDE TRANSFERIRSE A SI MISMO'
                    TO MSGO
                    SET HAY-ERROR-VALIDACION TO TRUE
+
+               WHEN HAY-ERROR-VALIDACION
+                   MOVE WS-OPER-MSGO TO MSGO
 
                WHEN VAL-HAY-ERROR
                    MOVE ' ERROR: MONTO INVALIDO (FORMATO)' TO MSGO
@@ -246,140 +251,38 @@
            MOVE ATTR-PROT-MDT TO MONTOA.
 
        2500-EJECUTAR-NEGOCIO.
-      * Inicializamos estado como fallido por defecto
+           MOVE SPACE TO WS-CONS-DEST
            SET OPERACION-FALLIDA TO TRUE.
-           MOVE SPACES TO WS-MSG-EXITO.
 
            MOVE USRDESTI TO WS-USER-DESTINO.
+           MOVE WS-MONTO-DECIMAL TO WS-OPER-MONTO
 
-      * 1. RE-LECTURA para evitar usar un saldo incorrecto
-           PERFORM 7000-LEER-SALDO-ORIGEN.
+           PERFORM 1234-REALIZAR-OPERACION.
 
-           IF SQLCODE NOT = 0
-               MOVE ' ERROR CRITICO LECTURA SALDO' TO MSGO
-               MOVE 'N' TO SW-CONFIRMACION
+
+           MOVE WS-OPER-MSGO TO MSGO
+
+           IF OPERACION-EXITOSA
+               MOVE LOW-VALUES   TO BNKMAPTO
+               MOVE SPACES       TO CONFRMO
                PERFORM 4200-DESBLOQUEAR-CAMPOS
-           ELSE
-               MOVE HV-SALDO TO WS-SALDO-ACTUAL
-               MOVE 'S'      TO SW-SALDO-LEIDO
+               MOVE SPACES       TO MONTOO
+               MOVE SPACES       TO USRDESTO
+               MOVE WS-SALDO-NUEVO TO WS-SALDO-ACTUAL
+               SET ENVIO-ERASE   TO TRUE
+               MOVE 'N'          TO SW-CONFIRMACION
+               END-IF.
+           
 
-               IF WS-MONTO-DECIMAL = 0
-                   SET HAY-ERROR-VALIDACION TO TRUE
-                   MOVE ' ERROR: MONTO LLEGO EN CERO' TO MSGO
-               END-IF
-
-               IF WS-SALDO-ACTUAL < WS-MONTO-DECIMAL
-                   MOVE ' FONDOS INSUFICIENTES' TO MSGO
-                   MOVE ATTR-RED TO MSGC
-                   MOVE 'N' TO SW-CONFIRMACION
-                   PERFORM 4200-DESBLOQUEAR-CAMPOS
-                   SET HAY-ERROR-VALIDACION TO TRUE
-               ELSE
-                   PERFORM 2600-VERIFICAR-LIMITE-DESTINO
-               END-IF
-
-               IF NO-HAY-ERRORES
-                   PERFORM 3000-PERSISTENCIA-DATOS
-               END-IF
-
-               IF OPERACION-EXITOSA
-                   MOVE LOW-VALUES   TO BNKMAPTO
-                   MOVE SPACES       TO CONFRMO
-                   MOVE WS-MSG-EXITO TO MSGO
-                   PERFORM 4200-DESBLOQUEAR-CAMPOS
-                   MOVE SPACES       TO MONTOO
-                   MOVE SPACES       TO USRDESTO
-                   MOVE WS-SALDO-NUEVO TO WS-SALDO-ACTUAL
-                   SET ENVIO-ERASE   TO TRUE
-                   MOVE 'N'          TO SW-CONFIRMACION
-               END-IF
-           END-IF.
-
-      *================================================================*
-      * 2600 - VERIFICACION LIMITE DESTINO                             *
-      *================================================================*
-       2600-VERIFICAR-LIMITE-DESTINO.
-           PERFORM 7300-VALIDAR-DESTINO-DB2.
-
-           COMPUTE WS-SALDO-NUEVO = HV-SALDO + WS-MONTO-DECIMAL
-
-           IF WS-SALDO-NUEVO > 99999999,99
-               MOVE ' ERROR: DESTINATARIO NO PUEDE RECIBIR TANTO MONTO'
-                  TO MSGO
-               MOVE ATTR-RED TO MSGC
-               MOVE 'N' TO SW-CONFIRMACION
-               SET HAY-ERROR-VALIDACION TO TRUE
-               PERFORM 4200-DESBLOQUEAR-CAMPOS
-           END-IF.
-
-      *================================================================*
-      * 3000 - PERSISTENCIA (ACID)                                     *
-      *================================================================*
-       3000-PERSISTENCIA-DATOS.
-           SUBTRACT WS-MONTO-DECIMAL FROM WS-SALDO-ACTUAL
-               GIVING WS-SALDO-NUEVO.
-
-           PERFORM 7100-UPDATE-SALDO-ORIGEN.
-
-           IF SQLCODE = 0
-               PERFORM 7400-UPDATE-SALDO-DESTINO
-               IF SQLCODE = 0
-      * ---------------------------------------------------------
-      * 1. REGISTRO PARA EL REMITENTE (Salida de dinero)
-      * ---------------------------------------------------------
-                   MOVE 'T'              TO HV-TIPO-OPER
-                   MOVE WS-MONTO-DECIMAL TO HV-MONTO
-                   MOVE CG-M-USER        TO HV-USUARIO-MOV
-                   MOVE WS-USER-DESTINO  TO HV-USUARIO-REL
-                   PERFORM 7200-INSERTAR-HISTORIAL
-
-                   IF SQLCODE = 0
-      * ---------------------------------------------------------
-      * 2. REGISTRO PARA EL DESTINATARIO (Entrada de dinero)
-      * ---------------------------------------------------------
-                       MOVE 'R'              TO HV-TIPO-OPER
-                       MOVE WS-MONTO-DECIMAL TO HV-MONTO
-                       MOVE WS-USER-DESTINO  TO HV-USUARIO-MOV
-                       MOVE CG-M-USER        TO HV-USUARIO-REL
-
-                       PERFORM 7200-INSERTAR-HISTORIAL
-
-                       IF SQLCODE = 0
-                           EXEC CICS SYNCPOINT END-EXEC
-                           SET OPERACION-EXITOSA TO TRUE
-                           MOVE ' TRANSFERENCIA EXITOSA' TO WS-MSG-EXITO
-                       ELSE
-                           EXEC CICS SYNCPOINT ROLLBACK END-EXEC
-                           MOVE ' ERROR HISTORIAL DESTINO' TO MSGO
-                       END-IF
-                   ELSE
-                       EXEC CICS SYNCPOINT ROLLBACK END-EXEC
-                       MOVE ' ERROR HISTORIAL ORIGEN' TO MSGO
-                   END-IF
-               ELSE
-                   EXEC CICS SYNCPOINT ROLLBACK END-EXEC
-                   MOVE ' ERROR AL ACREDITAR DESTINO' TO MSGO
-               END-IF
-           ELSE
-               EXEC CICS SYNCPOINT ROLLBACK END-EXEC
-               MOVE ' ERROR AL DEBITAR ORIGEN' TO MSGO
-           END-IF.
 
       *================================================================*
       * 4000 - MANEJO DE MAPAS                                         *
       *================================================================*
        4000-ENVIO-MAPA.
-
-           IF SW-SALDO-LEIDO = 'N'
-               PERFORM 7000-LEER-SALDO-ORIGEN
-               IF SQLCODE = 0
-                  MOVE HV-SALDO TO WS-SALDO-ACTUAL
-               END-IF
-           END-IF.
-
+           PERFORM 1234-CONSULTA-SALDO
            MOVE CG-M-USER       TO NOMBREUSO.
-           MOVE WS-SALDO-ACTUAL TO SALDOO.
-
+           
+           
            EVALUATE TRUE
                WHEN ENVIO-ERASE
                    EXEC CICS SEND MAP('BNKMAPT') MAPSET('BNKTMP')
@@ -397,43 +300,9 @@
            MOVE ATTR-UNPROT-MDT     TO USRDESTA.
            MOVE ATTR-UNPROT-NUM-MDT TO MONTOA.
 
-      *================================================================*
-      * 7000 - ACCESO A DATOS (DB2)                                    *
-      *================================================================*
-       7000-LEER-SALDO-ORIGEN.
-           MOVE CG-M-USER TO WS-USER-ORIGEN.
-           EXEC SQL SELECT SALDO INTO :HV-SALDO
-               FROM IBMUSER.CLIENTES WHERE USUARIO = :WS-USER-ORIGEN
-           END-EXEC.
 
-       7100-UPDATE-SALDO-ORIGEN.
-           MOVE WS-SALDO-NUEVO TO HV-SALDO.
-           EXEC SQL UPDATE IBMUSER.CLIENTES SET SALDO = :HV-SALDO
-               WHERE USUARIO = :WS-USER-ORIGEN
-           END-EXEC.
-
-       7200-INSERTAR-HISTORIAL.
-           EXEC SQL INSERT INTO IBMUSER.MOVIMIENTOS
-               (USUARIO, TIPO_OPER, MONTO, FECHA, USUARIO_REL)
-               VALUES (:HV-USUARIO-MOV, :HV-TIPO-OPER, :HV-MONTO,
-                CURRENT TIMESTAMP, :HV-USUARIO-REL)
-           END-EXEC.
-
-       7300-VALIDAR-DESTINO-DB2.
-           MOVE USRDESTI TO WS-USER-DESTINO.
-           EXEC SQL SELECT SALDO INTO :HV-SALDO
-               FROM IBMUSER.CLIENTES WHERE USUARIO = :WS-USER-DESTINO
-           END-EXEC.
-
-       7400-UPDATE-SALDO-DESTINO.
-           MOVE WS-MONTO-DECIMAL TO HV-MONTO.
-           EXEC SQL UPDATE IBMUSER.CLIENTES
-               SET SALDO = SALDO + :HV-MONTO
-               WHERE USUARIO = :WS-USER-DESTINO
-           END-EXEC.
 
        9000-VOLVER-AL-MENU.
-           INITIALIZE CH-COMUN.
            MOVE 'BNKT' TO CH-TRANS-RETORNO.
            EXEC CICS XCTL PROGRAM(CS-PGM-MENU)
                COMMAREA(COMMAREA-GLOBAL) RESP(WA-RESPUESTA-CICS)
@@ -453,3 +322,57 @@
            END-EXEC.
 
        COPY CPYVALPD.
+
+
+      *================================================================*
+      * 8000 - RUTINAS DE COMUNICACION CON EL BACKEND (CANALES)        *
+      *================================================================*
+       1234-CONSULTA-SALDO.
+           MOVE CG-M-USER TO WS-CONS-USER.
+
+           EXEC CICS DELETE CONTAINER('DATOS-ENTRADA')
+                             CHANNEL('CH-CAJA')
+                             RESP(WA-RESPUESTA-CICS)
+           END-EXEC.
+
+           EXEC CICS PUT CONTAINER('DATOS-CLIENTE')
+                         CHANNEL('CH-CAJA')
+                         FROM(WS-DATOS-CONSULTA)
+           END-EXEC.
+
+           EXEC CICS LINK PROGRAM('PBNKDB2T') CHANNEL('CH-CAJA')
+           END-EXEC.
+
+           EXEC CICS GET CONTAINER('DATOS-CLIENTE')
+                         CHANNEL('CH-CAJA')
+                         INTO(WS-DATOS-CONSULTA)
+           END-EXEC.
+           MOVE WS-CONS-SALDO TO SALDOO.
+
+       1234-REALIZAR-OPERACION.
+           MOVE CG-M-USER TO WS-CONS-USER.
+           MOVE USRDESTI TO WS-USER-DEST
+
+           EXEC CICS PUT CONTAINER('DATOS-CLIENTE')
+                         CHANNEL('CH-CAJA')
+                         FROM(WS-DATOS-CONSULTA)
+           END-EXEC.
+
+           EXEC CICS PUT CONTAINER('DATOS-ENTRADA')
+                         CHANNEL('CH-CAJA')
+                         FROM(WS-DATOS-OPERACION)
+           END-EXEC.
+
+           EXEC CICS LINK PROGRAM('PBNKDB2T') CHANNEL('CH-CAJA')
+           END-EXEC.
+
+           EXEC CICS GET CONTAINER('DATOS-CLIENTE')
+                         CHANNEL('CH-CAJA')
+                         INTO(WS-DATOS-CONSULTA)
+           END-EXEC.
+
+           EXEC CICS GET CONTAINER('DATOS-ENTRADA')
+                         CHANNEL('CH-CAJA')
+                         INTO(WS-DATOS-OPERACION)
+                         RESP(WA-RESPUESTA-CICS)
+           END-EXEC.
