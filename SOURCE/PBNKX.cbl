@@ -351,7 +351,6 @@
       * 9000 - NAVEGACION Y SALIDA                                     *
       *================================================================*
        9000-VOLVER-AL-MENU.
-      *    INITIALIZE CH-COMUN.
            MOVE 'BNKX' TO CH-TRANS-RETORNO.
            EXEC CICS XCTL PROGRAM(CS-PGM-MENU)
                COMMAREA(COMMAREA-GLOBAL) RESP(WA-RESPUESTA-CICS)
@@ -372,3 +371,4 @@
            END-EXEC.
 
        COPY CPYVALPD.
+
