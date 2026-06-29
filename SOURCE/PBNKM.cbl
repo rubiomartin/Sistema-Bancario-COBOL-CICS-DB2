@@ -80,7 +80,6 @@
       * 3. CARGA INICIAL: Viene de LOGN o retorna de Sub-programa
                WHEN EIBTRNID NOT = 'BNKM'
                    MOVE LOW-VALUE          TO BNKMAPMO
-                   INITIALIZE CH-COMUN
                    SET ENVIO-ERASE         TO TRUE
                    PERFORM 3000-ENVIO-MAPA
 
@@ -230,3 +229,4 @@
            EXEC CICS XCTL
                 PROGRAM (CS-PGM-LOGIN)
            END-EXEC.
+
