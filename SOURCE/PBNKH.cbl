@@ -446,7 +446,6 @@
            MOVE 'D' TO CG-H-ORDEN.
            MOVE '-' TO CG-H-UP-MORE.
            MOVE '-' TO CG-H-DOWN-MORE.
-           INITIALIZE CH-COMUN.
            MOVE WC-TRANSACCION TO CH-TRANS-RETORNO.
            EXEC CICS XCTL PROGRAM(CS-PGM-MENU)
                 COMMAREA(COMMAREA-GLOBAL)
