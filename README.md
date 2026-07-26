@@ -50,7 +50,7 @@ A diferencia de un CRUD simple donde el dinero es un campo que se sobrescribe (`
 
 ### Estructura Relacional en DB2 (1 a Muchos):
 * **Tabla `OPERACION` (Cabecera):** Registra el evento de negocio global (`ID_OPERACION` UUIDv4), la llave de idempotencia y los acuses de recibo fiscales y bancarios externos (`ID_COELSA`, `CAE_AFIP`).
-* **Tabla `MOVIMIENTO` (Detalle):** Almacena de 2 a 4 filas por transacción (Débito Origen, Crédito Destino, Comisión Fintech e Impuesto IVA). 
+* **Tabla `MOVIMIENTO` (Detalle):** Almacena de 2 a 4 filas por transacción (Débito Origen, Crédito Destino, Comisión e Impuesto IVA). 
   * *Innovación Técnica:* El `ID_MOVIMIENTO` se genera de forma nativa en el motor de DB2 mediante **`HEX(GENERATE_UNIQUE())`**, garantizando unicidad física en texto plano (CHAR 26) sin condiciones de carrera ni secuencias manuales.
 
 ![Modelo de Datos](assets%2FDiagramaTablasDB2.png)
