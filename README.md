@@ -83,7 +83,7 @@ El API Gateway (Node.js) evalúa la longitud del identificador de destino para e
 │   └── cpy/                      # Copybooks y utilidades de validación numérica
 │
 ├── 02- IBM i APIS/    # Versión 2: Programas COBOL refactorizados como APIs sin estado
-│   └── cbl/                      # PBNKTAPI (Partida doble), PBNKXAPI (Caja), PBNKHAPI (Paginación)
+│   └── cbl/                      # PBNKLAPI (Login), PBNKTAPI (Partida doble), PBNKXAPI (Caja), PBNKHAPI (Paginación)
 │
 ├── 03 - API GATEWAY NODE/          # Backend Cloud-Native en Node.js (Arquitectura Hexagonal)
 │   ├── src/
