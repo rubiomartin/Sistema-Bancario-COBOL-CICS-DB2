@@ -63,19 +63,19 @@
        COMIENZO.
            PERFORM 1000-INICIALIZAR       THRU 1000-FIN
            PERFORM 2000-ABRIR-CURSOR      THRU 2000-FIN
-           
+
            IF CURSOR-ABIERTO
               PERFORM 3000-SALTAR-OFFSET  THRU 3000-FIN
            END-IF
-           
+
            IF CURSOR-ABIERTO AND FETCH-OK
               PERFORM 4000-CARGAR-PAGINA  THRU 4000-FIN
            END-IF
-           
+
            IF CURSOR-ABIERTO
               PERFORM 5000-CERRAR-CURSOR  THRU 5000-FIN
            END-IF
-           
+
            PERFORM 9000-FINALIZAR         THRU 9000-FIN
            GOBACK.
 
@@ -88,7 +88,7 @@
            MOVE LK-DATE-FROM TO HV-DATE-FROM
            MOVE LK-DATE-TO   TO HV-DATE-TO
            MOVE LK-OFFSET    TO HV-OFFSET
-           
+
            MOVE 1            TO WS-IDX
            MOVE 0            TO LK-COUNT
            SET FETCH-OK      TO TRUE
@@ -149,7 +149,7 @@
        4000-CARGAR-PAGINA.
            PERFORM UNTIL WS-IDX > 10 OR FETCH-EOF OR FETCH-ERROR
                PERFORM 8000-LEER-CURSOR THRU 8000-FIN
-               
+
                IF FETCH-OK
                   PERFORM 4100-MAPEAR-REGISTRO THRU 4100-FIN
                   ADD 1 TO LK-COUNT
@@ -173,7 +173,11 @@
                       MOVE "R" TO HV-TIPO-OPER-OUT
                    END-IF
               WHEN ES-TRAN
-                   MOVE "T" TO HV-TIPO-OPER-OUT
+                   IF HV-MONTO > 0
+                      MOVE "C" TO HV-TIPO-OPER-OUT
+                   ELSE
+                      MOVE "T" TO HV-TIPO-OPER-OUT
+                   END-IF
               WHEN OTHER
                    MOVE "O" TO HV-TIPO-OPER-OUT
            END-EVALUATE.
